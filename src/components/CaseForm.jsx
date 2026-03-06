@@ -8,19 +8,61 @@ const INFRACTION_TYPES = [
   { value: 'other', label: 'Other vehicle-related charge' },
 ]
 
+const OWNERSHIP_STATUSES = [
+  { value: 'sold_before', label: 'I sold the vehicle before the infraction' },
+  { value: 'purchased_after', label: 'I purchased the vehicle after the infraction' },
+  { value: 'never_owned', label: 'I never owned the vehicle' },
+  { value: 'transferred_not_registered', label: 'The vehicle was transferred but not yet registered' },
+  { value: 'other', label: 'Other' },
+]
+
+const DOCUMENT_TYPES = [
+  { value: '', label: 'Select document type' },
+  { value: 'sale_contract', label: 'Vehicle Sale Contract' },
+  { value: 'ownership_certificate', label: 'Vehicle Ownership Certificate' },
+  { value: 'id_document', label: 'ID Document' },
+  { value: 'other', label: 'Other Supporting Document' },
+]
+
 const initialFormData = {
   // Section 1 – Case Identification
   trafficFineNumber: '',
   infractionDate: '',
   infractionType: '',
+  // Section 2 – Applicant Information
+  firstName: '',
+  lastName: '',
+  dateOfBirth: '',
+  address: '',
+  // Section 3 – Vehicle Information
+  licensePlateNumber: '',
+  vin: '',
+  vehicleBrand: '',
+  // Section 4 – Ownership Status Declaration
+  ownershipStatus: '',
+  // Section 5 – Ownership Timeline
+  dateSold: '',
+  datePurchased: '',
+  transferRegistrationDate: '',
+  // Section 6 – Supporting Documents
+  documentType: '',
+  uploadedFile: null,
+  // Section 7 – Declaration
+  declarationAccepted: false,
 }
 
 export default function CaseForm() {
   const [formData, setFormData] = useState(initialFormData)
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const { name, value, type, checked, files } = e.target
+    if (type === 'checkbox') {
+      setFormData((prev) => ({ ...prev, [name]: checked }))
+    } else if (type === 'file') {
+      setFormData((prev) => ({ ...prev, [name]: files[0] ?? null }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleSubmit = (e) => {
@@ -38,7 +80,6 @@ export default function CaseForm() {
           <h2 className="section-title">Case Identification</h2>
 
           <div className="form-grid">
-            {/* Traffic Fine Number */}
             <div className="form-group">
               <label htmlFor="trafficFineNumber">Traffic Fine Number</label>
               <input
@@ -51,7 +92,6 @@ export default function CaseForm() {
               />
             </div>
 
-            {/* Infraction Date */}
             <div className="form-group">
               <label htmlFor="infractionDate">Infraction Date</label>
               <input
@@ -63,7 +103,6 @@ export default function CaseForm() {
               />
             </div>
 
-            {/* Infraction Type */}
             <div className="form-group">
               <label htmlFor="infractionType">Infraction Type</label>
               <select
@@ -82,10 +121,216 @@ export default function CaseForm() {
           </div>
         </div>
 
-        {/* ── Section 2: Applicant Information (placeholder) ── */}
+        {/* ── Section 2: Applicant Information ── */}
         <div className="form-section">
           <h2 className="section-title">Applicant Information</h2>
-          <p className="section-placeholder">More fields coming soon…</p>
+
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="firstName">First Name</label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                placeholder="Enter first name"
+                value={formData.firstName}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                placeholder="Enter last name"
+                value={formData.lastName}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="dateOfBirth">Date of Birth</label>
+              <input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group form-group--full">
+              <label htmlFor="address">Address</label>
+              <input
+                id="address"
+                name="address"
+                type="text"
+                placeholder="Enter full address"
+                value={formData.address}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Section 3: Vehicle Information ── */}
+        <div className="form-section">
+          <h2 className="section-title">Vehicle Information</h2>
+
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="licensePlateNumber">License Plate Number</label>
+              <input
+                id="licensePlateNumber"
+                name="licensePlateNumber"
+                type="text"
+                placeholder="Enter license plate"
+                value={formData.licensePlateNumber}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="vin">Vehicle Identification Number (VIN)</label>
+              <input
+                id="vin"
+                name="vin"
+                type="text"
+                placeholder="Enter VIN"
+                value={formData.vin}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="vehicleBrand">Vehicle Brand</label>
+              <input
+                id="vehicleBrand"
+                name="vehicleBrand"
+                type="text"
+                placeholder="Enter vehicle brand"
+                value={formData.vehicleBrand}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Section 4: Ownership Status Declaration ── */}
+        <div className="form-section">
+          <h2 className="section-title">Ownership Status Declaration</h2>
+
+          <div className="form-group">
+            <label className="field-label">Ownership Status at Time of Infraction</label>
+            <div className="radio-group">
+              {OWNERSHIP_STATUSES.map((opt) => (
+                <label key={opt.value} className="radio-option">
+                  <input
+                    type="radio"
+                    name="ownershipStatus"
+                    value={opt.value}
+                    checked={formData.ownershipStatus === opt.value}
+                    onChange={handleChange}
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Section 5: Ownership Timeline ── */}
+        <div className="form-section">
+          <h2 className="section-title">Ownership Timeline</h2>
+
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="dateSold">Date Vehicle Sold</label>
+              <input
+                id="dateSold"
+                name="dateSold"
+                type="date"
+                value={formData.dateSold}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="datePurchased">Date Vehicle Purchased</label>
+              <input
+                id="datePurchased"
+                name="datePurchased"
+                type="date"
+                value={formData.datePurchased}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="transferRegistrationDate">Ownership Transfer Registration Date</label>
+              <input
+                id="transferRegistrationDate"
+                name="transferRegistrationDate"
+                type="date"
+                value={formData.transferRegistrationDate}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Section 6: Supporting Documents Upload ── */}
+        <div className="form-section">
+          <h2 className="section-title">Supporting Documents Upload</h2>
+
+          <div className="form-grid">
+            <div className="form-group form-group--full">
+              <label htmlFor="documentType">Document Type</label>
+              <select
+                id="documentType"
+                name="documentType"
+                value={formData.documentType}
+                onChange={handleChange}
+              >
+                {DOCUMENT_TYPES.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group form-group--full">
+              <label htmlFor="uploadedFile">Upload Document</label>
+              <input
+                id="uploadedFile"
+                name="uploadedFile"
+                type="file"
+                className="file-input"
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Section 7: Declaration ── */}
+        <div className="form-section">
+          <h2 className="section-title">Declaration</h2>
+
+          <label className="checkbox-option">
+            <input
+              type="checkbox"
+              name="declarationAccepted"
+              checked={formData.declarationAccepted}
+              onChange={handleChange}
+            />
+            <span>
+              I declare that the information provided is accurate and that I was not the owner
+              of the vehicle at the time of the infraction.
+            </span>
+          </label>
         </div>
 
         <button type="submit" className="submit-btn">Submit</button>
