@@ -75,6 +75,14 @@ export default function CaseForm() {
     <div className="form-wrapper">
       <form className="case-form" onSubmit={handleSubmit} noValidate>
 
+        {/* ── Logo ── */}
+        <div className="form-logo">
+          <img
+            src="https://nivi.it/wp-content/uploads/2025/12/LOGO-NEW.png"
+            alt="Logo"
+          />
+        </div>
+
         {/* ── Section 1: Case Identification ── */}
         <div className="form-section">
           <h2 className="section-title">Case Identification</h2>
