@@ -51,7 +51,7 @@ const initialFormData = {
   declarationAccepted: false,
 }
 
-const API_URL = 'http://localhost:8080/api/cases'
+const API_URL = 'http://localhost:8080/cases'
 
 export default function CaseForm() {
   const [formData, setFormData] = useState(initialFormData)
@@ -83,15 +83,12 @@ export default function CaseForm() {
 
     try {
       const res = await fetch(API_URL, { method: 'POST', body: payload })
-      const json = await res.json()
+      const text = await res.text()
       if (res.ok) {
-        setSubmitResult({ success: true, message: json.message ?? 'Case submitted successfully!' })
+        setSubmitResult({ success: true, message: 'Case submitted successfully!' })
         setFormData(initialFormData)
       } else {
-        const errMsg = json.errors
-          ? json.errors.map((e) => e.message).join(', ')
-          : json.message ?? 'Submission failed.'
-        setSubmitResult({ success: false, message: errMsg })
+        setSubmitResult({ success: false, message: text || 'Submission failed.' })
       }
     } catch {
       setSubmitResult({ success: false, message: 'Network error – could not reach the server.' })
