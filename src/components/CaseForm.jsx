@@ -51,8 +51,12 @@ const initialFormData = {
   declarationAccepted: false,
 }
 
+const API_URL = 'http://localhost:3001/api/cases'
+
 export default function CaseForm() {
   const [formData, setFormData] = useState(initialFormData)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitResult, setSubmitResult] = useState(null) // { success, message }
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target
@@ -65,10 +69,35 @@ export default function CaseForm() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    alert('Form submitted successfully!')
+    setSubmitting(true)
+    setSubmitResult(null)
+
+    const payload = new FormData()
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        payload.append(key, value)
+      }
+    })
+
+    try {
+      const res = await fetch(API_URL, { method: 'POST', body: payload })
+      const json = await res.json()
+      if (res.ok) {
+        setSubmitResult({ success: true, message: json.message ?? 'Case submitted successfully!' })
+        setFormData(initialFormData)
+      } else {
+        const errMsg = json.errors
+          ? json.errors.map((e) => e.message).join(', ')
+          : json.message ?? 'Submission failed.'
+        setSubmitResult({ success: false, message: errMsg })
+      }
+    } catch {
+      setSubmitResult({ success: false, message: 'Network error – could not reach the server.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -341,7 +370,15 @@ export default function CaseForm() {
           </label>
         </div>
 
-        <button type="submit" className="submit-btn">Submit</button>
+        {submitResult && (
+          <div className={`submit-result submit-result--${submitResult.success ? 'success' : 'error'}`}>
+            {submitResult.message}
+          </div>
+        )}
+
+        <button type="submit" className="submit-btn" disabled={submitting}>
+          {submitting ? 'Submitting…' : 'Submit'}
+        </button>
       </form>
     </div>
   )
