@@ -51,7 +51,7 @@ const initialFormData = {
   declarationAccepted: false,
 }
 
-const API_URL = 'http://localhost:3001/api/cases'
+const API_URL = 'http://localhost:8080/api/cases'
 
 export default function CaseForm() {
   const [formData, setFormData] = useState(initialFormData)
