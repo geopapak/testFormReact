@@ -1,0 +1,181 @@
+{
+  "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "lastMigration": 33,
+  "name": "Case Form API",
+  "endpointPrefix": "api",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "11111111-1111-1111-1111-111111111101",
+      "type": "http",
+      "documentation": "Submit a new case",
+      "method": "post",
+      "endpoint": "cases",
+      "responses": [
+        {
+          "uuid": "22222222-2222-2222-2222-222222222201",
+          "body": "{\n  \"success\": true,\n  \"message\": \"Case submitted successfully\",\n  \"data\": {\n    \"caseId\": \"CASE-{{now 'x'}}\",\n    \"status\": \"pending\",\n    \"trafficFineNumber\": \"{{body 'trafficFineNumber'}}\",\n    \"infractionDate\": \"{{body 'infractionDate'}}\",\n    \"infractionType\": \"{{body 'infractionType'}}\",\n    \"firstName\": \"{{body 'firstName'}}\",\n    \"lastName\": \"{{body 'lastName'}}\",\n    \"dateOfBirth\": \"{{body 'dateOfBirth'}}\",\n    \"address\": \"{{body 'address'}}\",\n    \"licensePlateNumber\": \"{{body 'licensePlateNumber'}}\",\n    \"vin\": \"{{body 'vin'}}\",\n    \"vehicleBrand\": \"{{body 'vehicleBrand'}}\",\n    \"ownershipStatus\": \"{{body 'ownershipStatus'}}\",\n    \"dateSold\": \"{{body 'dateSold'}}\",\n    \"datePurchased\": \"{{body 'datePurchased'}}\",\n    \"transferRegistrationDate\": \"{{body 'transferRegistrationDate'}}\",\n    \"documentType\": \"{{body 'documentType'}}\",\n    \"declarationAccepted\": {{body 'declarationAccepted'}},\n    \"submittedAt\": \"{{now 'YYYY-MM-DDTHH:mm:ssZ'}}\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Success - Case created",
+          "headers": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "22222222-2222-2222-2222-222222222202",
+          "body": "{\n  \"success\": false,\n  \"message\": \"Validation error\",\n  \"errors\": [\n    { \"field\": \"trafficFineNumber\", \"message\": \"Traffic fine number is required\" },\n    { \"field\": \"declarationAccepted\", \"message\": \"You must accept the declaration\" }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 400,
+          "label": "Error - Validation failed",
+          "headers": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "trafficFineNumber",
+              "value": "^$",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "11111111-1111-1111-1111-111111111102",
+      "type": "http",
+      "documentation": "Get list of cases",
+      "method": "get",
+      "endpoint": "cases",
+      "responses": [
+        {
+          "uuid": "22222222-2222-2222-2222-222222222203",
+          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"caseId\": \"CASE-1001\",\n      \"status\": \"pending\",\n      \"trafficFineNumber\": \"TF-20240101-001\",\n      \"infractionDate\": \"2024-01-01\",\n      \"infractionType\": \"traffic_fine\",\n      \"firstName\": \"Mario\",\n      \"lastName\": \"Rossi\",\n      \"licensePlateNumber\": \"AB123CD\",\n      \"ownershipStatus\": \"sold_before\",\n      \"submittedAt\": \"2024-01-10T09:30:00+01:00\"\n    },\n    {\n      \"caseId\": \"CASE-1002\",\n      \"status\": \"approved\",\n      \"trafficFineNumber\": \"TF-20240215-008\",\n      \"infractionDate\": \"2024-02-15\",\n      \"infractionType\": \"toll_violation\",\n      \"firstName\": \"Giulia\",\n      \"lastName\": \"Bianchi\",\n      \"licensePlateNumber\": \"XY456ZW\",\n      \"ownershipStatus\": \"purchased_after\",\n      \"submittedAt\": \"2024-02-20T14:15:00+01:00\"\n    }\n  ],\n  \"total\": 2\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success - Cases list",
+          "headers": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "11111111-1111-1111-1111-111111111103",
+      "type": "http",
+      "documentation": "Get a single case by ID",
+      "method": "get",
+      "endpoint": "cases/:caseId",
+      "responses": [
+        {
+          "uuid": "22222222-2222-2222-2222-222222222204",
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"caseId\": \"{{urlParam 'caseId'}}\",\n    \"status\": \"pending\",\n    \"trafficFineNumber\": \"TF-20240101-001\",\n    \"infractionDate\": \"2024-01-01\",\n    \"infractionType\": \"traffic_fine\",\n    \"firstName\": \"Mario\",\n    \"lastName\": \"Rossi\",\n    \"dateOfBirth\": \"1980-05-20\",\n    \"address\": \"Via Roma 1, 00100 Roma\",\n    \"licensePlateNumber\": \"AB123CD\",\n    \"vin\": \"WBA3A5C55FK123456\",\n    \"vehicleBrand\": \"BMW\",\n    \"ownershipStatus\": \"sold_before\",\n    \"dateSold\": \"2023-12-15\",\n    \"datePurchased\": \"\",\n    \"transferRegistrationDate\": \"2023-12-20\",\n    \"documentType\": \"sale_contract\",\n    \"declarationAccepted\": true,\n    \"submittedAt\": \"2024-01-10T09:30:00+01:00\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success - Single case",
+          "headers": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "22222222-2222-2222-2222-222222222205",
+          "body": "{\n  \"success\": false,\n  \"message\": \"Case not found\"\n}",
+          "latency": 0,
+          "statusCode": 404,
+          "label": "Error - Case not found",
+          "headers": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    { "type": "route", "uuid": "11111111-1111-1111-1111-111111111101" },
+    { "type": "route", "uuid": "11111111-1111-1111-1111-111111111102" },
+    { "type": "route", "uuid": "11111111-1111-1111-1111-111111111103" }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "BUILT_IN",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    { "key": "Content-Type", "value": "application/json" },
+    { "key": "Access-Control-Allow-Origin", "value": "*" }
+  ],
+  "proxyReqHeaders": [{ "key": "", "value": "" }],
+  "proxyResHeaders": [{ "key": "", "value": "" }],
+  "data": [],
+  "callbacks": []
+}

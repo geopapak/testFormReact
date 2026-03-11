@@ -51,8 +51,12 @@ const initialFormData = {
   declarationAccepted: false,
 }
 
+const API_URL = 'http://localhost:8080/nivi/api/cases'
+
 export default function CaseForm() {
   const [formData, setFormData] = useState(initialFormData)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitResult, setSubmitResult] = useState(null) // { success, message }
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target
@@ -65,15 +69,45 @@ export default function CaseForm() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    alert('Form submitted successfully!')
+    setSubmitting(true)
+    setSubmitResult(null)
+
+    const payload = new FormData()
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        payload.append(key, value)
+      }
+    })
+
+    try {
+      const res = await fetch(API_URL, { method: 'POST', body: payload })
+      const text = await res.text()
+      if (res.ok) {
+        setSubmitResult({ success: true, message: 'Case submitted successfully!' })
+        setFormData(initialFormData)
+      } else {
+        setSubmitResult({ success: false, message: text || 'Submission failed.' })
+      }
+    } catch {
+      setSubmitResult({ success: false, message: 'Network error – could not reach the server.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <div className="form-wrapper">
       <form className="case-form" onSubmit={handleSubmit} noValidate>
+
+        {/* ── Logo ── */}
+        <div className="form-logo">
+          <img
+            src="https://nivi.it/wp-content/uploads/2025/12/LOGO-NEW.png"
+            alt="Logo"
+          />
+        </div>
 
         {/* ── Section 1: Case Identification ── */}
         <div className="form-section">
@@ -333,7 +367,15 @@ export default function CaseForm() {
           </label>
         </div>
 
-        <button type="submit" className="submit-btn">Submit</button>
+        {submitResult && (
+          <div className={`submit-result submit-result--${submitResult.success ? 'success' : 'error'}`}>
+            {submitResult.message}
+          </div>
+        )}
+
+        <button type="submit" className="submit-btn" disabled={submitting}>
+          {submitting ? 'Submitting…' : 'Submit'}
+        </button>
       </form>
     </div>
   )
