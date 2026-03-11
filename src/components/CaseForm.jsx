@@ -211,6 +211,16 @@ export default function CaseForm() {
               {errors.dateOfBirth && <span className="field-error">{errors.dateOfBirth}</span>}
             </div>
 
+            <div className="form-group">
+              <label htmlFor="vat">VAT <span className="required">*</span></label>
+              <input
+                id="vat" name="vat" type="text" placeholder="VAT"
+                value={formData.vat} onChange={handleChange}
+                className={errors.vat ? 'input-error' : ''}
+              />
+              {errors.vat && <span className="field-error">{errors.vat}</span>}
+            </div>
+
             <div className="form-group form-group--full">
               <label htmlFor="address">Address <span className="required">*</span></label>
               <input
