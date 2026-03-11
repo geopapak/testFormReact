@@ -32,6 +32,7 @@ const initialFormData = {
   lastName: '',
   dateOfBirth: '',
   address: '',
+  vat: '',
   licensePlateNumber: '',
   vin: '',
   vehicleBrand: '',
