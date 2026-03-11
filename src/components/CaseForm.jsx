@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import './CaseForm.css'
 
 const INFRACTION_TYPES = [
@@ -25,38 +25,54 @@ const DOCUMENT_TYPES = [
 ]
 
 const initialFormData = {
-  // Section 1 – Case Identification
   trafficFineNumber: '',
   infractionDate: '',
   infractionType: '',
-  // Section 2 – Applicant Information
   firstName: '',
   lastName: '',
   dateOfBirth: '',
   address: '',
-  // Section 3 – Vehicle Information
   licensePlateNumber: '',
   vin: '',
   vehicleBrand: '',
-  // Section 4 – Ownership Status Declaration
   ownershipStatus: '',
-  // Section 5 – Ownership Timeline
   dateSold: '',
   datePurchased: '',
   transferRegistrationDate: '',
-  // Section 6 – Supporting Documents
   documentType: '',
   uploadedFile: null,
-  // Section 7 – Declaration
   declarationAccepted: false,
 }
 
 const API_URL = 'http://localhost:8080/nivi/api/cases'
 
+function validate(formData) {
+  const errors = {}
+  if (!formData.trafficFineNumber.trim())   errors.trafficFineNumber = 'Required'
+  if (!formData.infractionDate)             errors.infractionDate = 'Required'
+  if (!formData.infractionType)             errors.infractionType = 'Required'
+  if (!formData.firstName.trim())           errors.firstName = 'Required'
+  if (!formData.lastName.trim())            errors.lastName = 'Required'
+  if (!formData.dateOfBirth)               errors.dateOfBirth = 'Required'
+  if (!formData.address.trim())            errors.address = 'Required'
+  if (!formData.licensePlateNumber.trim()) errors.licensePlateNumber = 'Required'
+  if (!formData.vin.trim())                errors.vin = 'Required'
+  if (!formData.vehicleBrand.trim())       errors.vehicleBrand = 'Required'
+  if (!formData.ownershipStatus)           errors.ownershipStatus = 'Required'
+  if (!formData.dateSold && !formData.datePurchased && !formData.transferRegistrationDate)
+    errors.ownershipTimeline = 'At least one date is required'
+  if (!formData.documentType)              errors.documentType = 'Required'
+  if (!formData.uploadedFile)              errors.uploadedFile = 'Required'
+  if (!formData.declarationAccepted)       errors.declarationAccepted = 'You must accept the declaration'
+  return errors
+}
+
 export default function CaseForm() {
   const [formData, setFormData] = useState(initialFormData)
+  const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
-  const [submitResult, setSubmitResult] = useState(null) // { success, message }
+  const [submitResult, setSubmitResult] = useState(null)
+  const [fileInputKey, setFileInputKey] = useState(0) // forces file input remount on reset
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target
@@ -67,12 +83,21 @@ export default function CaseForm() {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }))
     }
+    // clear error on change
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitting(true)
     setSubmitResult(null)
+
+    const validationErrors = validate(formData)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    setSubmitting(true)
 
     const payload = new FormData()
     Object.entries(formData).forEach(([key, value]) => {
@@ -87,6 +112,8 @@ export default function CaseForm() {
       if (res.ok) {
         setSubmitResult({ success: true, message: 'Case submitted successfully!' })
         setFormData(initialFormData)
+        setErrors({})
+        setFileInputKey((k) => k + 1) // remount file input → clears it
       } else {
         setSubmitResult({ success: false, message: text || 'Submission failed.' })
       }
@@ -103,168 +130,151 @@ export default function CaseForm() {
 
         {/* ── Logo ── */}
         <div className="form-logo">
-          <img
-            src="https://nivi.it/wp-content/uploads/2025/12/LOGO-NEW.png"
-            alt="Logo"
-          />
+          <img src="https://nivi.it/wp-content/uploads/2025/12/LOGO-NEW.png" alt="Logo" />
         </div>
 
         {/* ── Section 1: Case Identification ── */}
         <div className="form-section">
           <h2 className="section-title">Case Identification</h2>
-
           <div className="form-grid">
+
             <div className="form-group">
-              <label htmlFor="trafficFineNumber">Traffic Fine Number</label>
+              <label htmlFor="trafficFineNumber">Traffic Fine Number <span className="required">*</span></label>
               <input
-                id="trafficFineNumber"
-                name="trafficFineNumber"
-                type="text"
+                id="trafficFineNumber" name="trafficFineNumber" type="text"
                 placeholder="Enter traffic fine number"
-                value={formData.trafficFineNumber}
-                onChange={handleChange}
+                value={formData.trafficFineNumber} onChange={handleChange}
+                className={errors.trafficFineNumber ? 'input-error' : ''}
               />
+              {errors.trafficFineNumber && <span className="field-error">{errors.trafficFineNumber}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="infractionDate">Infraction Date</label>
+              <label htmlFor="infractionDate">Infraction Date <span className="required">*</span></label>
               <input
-                id="infractionDate"
-                name="infractionDate"
-                type="date"
-                value={formData.infractionDate}
-                onChange={handleChange}
+                id="infractionDate" name="infractionDate" type="date"
+                value={formData.infractionDate} onChange={handleChange}
+                className={errors.infractionDate ? 'input-error' : ''}
               />
+              {errors.infractionDate && <span className="field-error">{errors.infractionDate}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="infractionType">Infraction Type</label>
+              <label htmlFor="infractionType">Infraction Type <span className="required">*</span></label>
               <select
-                id="infractionType"
-                name="infractionType"
-                value={formData.infractionType}
-                onChange={handleChange}
+                id="infractionType" name="infractionType"
+                value={formData.infractionType} onChange={handleChange}
+                className={errors.infractionType ? 'input-error' : ''}
               >
                 {INFRACTION_TYPES.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.infractionType && <span className="field-error">{errors.infractionType}</span>}
             </div>
+
           </div>
         </div>
 
         {/* ── Section 2: Applicant Information ── */}
         <div className="form-section">
           <h2 className="section-title">Applicant Information</h2>
-
           <div className="form-grid">
+
             <div className="form-group">
-              <label htmlFor="firstName">First Name</label>
+              <label htmlFor="firstName">First Name <span className="required">*</span></label>
               <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                placeholder="Enter first name"
-                value={formData.firstName}
-                onChange={handleChange}
+                id="firstName" name="firstName" type="text" placeholder="Enter first name"
+                value={formData.firstName} onChange={handleChange}
+                className={errors.firstName ? 'input-error' : ''}
               />
+              {errors.firstName && <span className="field-error">{errors.firstName}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="lastName">Last Name</label>
+              <label htmlFor="lastName">Last Name <span className="required">*</span></label>
               <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                placeholder="Enter last name"
-                value={formData.lastName}
-                onChange={handleChange}
+                id="lastName" name="lastName" type="text" placeholder="Enter last name"
+                value={formData.lastName} onChange={handleChange}
+                className={errors.lastName ? 'input-error' : ''}
               />
+              {errors.lastName && <span className="field-error">{errors.lastName}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="dateOfBirth">Date of Birth</label>
+              <label htmlFor="dateOfBirth">Date of Birth <span className="required">*</span></label>
               <input
-                id="dateOfBirth"
-                name="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
+                id="dateOfBirth" name="dateOfBirth" type="date"
+                value={formData.dateOfBirth} onChange={handleChange}
+                className={errors.dateOfBirth ? 'input-error' : ''}
               />
+              {errors.dateOfBirth && <span className="field-error">{errors.dateOfBirth}</span>}
             </div>
 
             <div className="form-group form-group--full">
-              <label htmlFor="address">Address</label>
+              <label htmlFor="address">Address <span className="required">*</span></label>
               <input
-                id="address"
-                name="address"
-                type="text"
-                placeholder="Enter full address"
-                value={formData.address}
-                onChange={handleChange}
+                id="address" name="address" type="text" placeholder="Enter full address"
+                value={formData.address} onChange={handleChange}
+                className={errors.address ? 'input-error' : ''}
               />
+              {errors.address && <span className="field-error">{errors.address}</span>}
             </div>
+
           </div>
         </div>
 
         {/* ── Section 3: Vehicle Information ── */}
         <div className="form-section">
           <h2 className="section-title">Vehicle Information</h2>
-
           <div className="form-grid">
+
             <div className="form-group">
-              <label htmlFor="licensePlateNumber">License Plate Number</label>
+              <label htmlFor="licensePlateNumber">License Plate Number <span className="required">*</span></label>
               <input
-                id="licensePlateNumber"
-                name="licensePlateNumber"
-                type="text"
+                id="licensePlateNumber" name="licensePlateNumber" type="text"
                 placeholder="Enter license plate"
-                value={formData.licensePlateNumber}
-                onChange={handleChange}
+                value={formData.licensePlateNumber} onChange={handleChange}
+                className={errors.licensePlateNumber ? 'input-error' : ''}
               />
+              {errors.licensePlateNumber && <span className="field-error">{errors.licensePlateNumber}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="vin">Vehicle Identification Number (VIN)</label>
+              <label htmlFor="vin">Vehicle Identification Number (VIN) <span className="required">*</span></label>
               <input
-                id="vin"
-                name="vin"
-                type="text"
-                placeholder="Enter VIN"
-                value={formData.vin}
-                onChange={handleChange}
+                id="vin" name="vin" type="text" placeholder="Enter VIN"
+                value={formData.vin} onChange={handleChange}
+                className={errors.vin ? 'input-error' : ''}
               />
+              {errors.vin && <span className="field-error">{errors.vin}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="vehicleBrand">Vehicle Brand</label>
+              <label htmlFor="vehicleBrand">Vehicle Brand <span className="required">*</span></label>
               <input
-                id="vehicleBrand"
-                name="vehicleBrand"
-                type="text"
-                placeholder="Enter vehicle brand"
-                value={formData.vehicleBrand}
-                onChange={handleChange}
+                id="vehicleBrand" name="vehicleBrand" type="text" placeholder="Enter vehicle brand"
+                value={formData.vehicleBrand} onChange={handleChange}
+                className={errors.vehicleBrand ? 'input-error' : ''}
               />
+              {errors.vehicleBrand && <span className="field-error">{errors.vehicleBrand}</span>}
             </div>
+
           </div>
         </div>
 
         {/* ── Section 4: Ownership Status Declaration ── */}
         <div className="form-section">
           <h2 className="section-title">Ownership Status Declaration</h2>
-
           <div className="form-group">
-            <label className="field-label">Ownership Status at Time of Infraction</label>
+            <label className="field-label">
+              Ownership Status at Time of Infraction <span className="required">*</span>
+            </label>
             <div className="radio-group">
               {OWNERSHIP_STATUSES.map((opt) => (
                 <label key={opt.value} className="radio-option">
                   <input
-                    type="radio"
-                    name="ownershipStatus"
-                    value={opt.value}
+                    type="radio" name="ownershipStatus" value={opt.value}
                     checked={formData.ownershipStatus === opt.value}
                     onChange={handleChange}
                   />
@@ -272,99 +282,93 @@ export default function CaseForm() {
                 </label>
               ))}
             </div>
+            {errors.ownershipStatus && <span className="field-error">{errors.ownershipStatus}</span>}
           </div>
         </div>
 
         {/* ── Section 5: Ownership Timeline ── */}
         <div className="form-section">
-          <h2 className="section-title">Ownership Timeline</h2>
-
+          <h2 className="section-title">Ownership Timeline <span className="required">*</span></h2>
           <div className="form-grid">
+
             <div className="form-group">
               <label htmlFor="dateSold">Date Vehicle Sold</label>
               <input
-                id="dateSold"
-                name="dateSold"
-                type="date"
-                value={formData.dateSold}
-                onChange={handleChange}
+                id="dateSold" name="dateSold" type="date"
+                value={formData.dateSold} onChange={handleChange}
+                className={errors.ownershipTimeline ? 'input-error' : ''}
               />
             </div>
 
             <div className="form-group">
               <label htmlFor="datePurchased">Date Vehicle Purchased</label>
               <input
-                id="datePurchased"
-                name="datePurchased"
-                type="date"
-                value={formData.datePurchased}
-                onChange={handleChange}
+                id="datePurchased" name="datePurchased" type="date"
+                value={formData.datePurchased} onChange={handleChange}
+                className={errors.ownershipTimeline ? 'input-error' : ''}
               />
             </div>
 
             <div className="form-group">
               <label htmlFor="transferRegistrationDate">Ownership Transfer Registration Date</label>
               <input
-                id="transferRegistrationDate"
-                name="transferRegistrationDate"
-                type="date"
-                value={formData.transferRegistrationDate}
-                onChange={handleChange}
+                id="transferRegistrationDate" name="transferRegistrationDate" type="date"
+                value={formData.transferRegistrationDate} onChange={handleChange}
+                className={errors.ownershipTimeline ? 'input-error' : ''}
               />
             </div>
+
           </div>
+          {errors.ownershipTimeline && <span className="field-error">{errors.ownershipTimeline}</span>}
         </div>
 
         {/* ── Section 6: Supporting Documents Upload ── */}
         <div className="form-section">
           <h2 className="section-title">Supporting Documents Upload</h2>
-
           <div className="form-grid">
+
             <div className="form-group form-group--full">
-              <label htmlFor="documentType">Document Type</label>
+              <label htmlFor="documentType">Document Type <span className="required">*</span></label>
               <select
-                id="documentType"
-                name="documentType"
-                value={formData.documentType}
-                onChange={handleChange}
+                id="documentType" name="documentType"
+                value={formData.documentType} onChange={handleChange}
+                className={errors.documentType ? 'input-error' : ''}
               >
                 {DOCUMENT_TYPES.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
+              {errors.documentType && <span className="field-error">{errors.documentType}</span>}
             </div>
 
             <div className="form-group form-group--full">
-              <label htmlFor="uploadedFile">Upload Document</label>
+              <label htmlFor="uploadedFile">Upload Document <span className="required">*</span></label>
               <input
-                id="uploadedFile"
-                name="uploadedFile"
-                type="file"
-                className="file-input"
+                key={fileInputKey}
+                id="uploadedFile" name="uploadedFile" type="file"
+                className={`file-input${errors.uploadedFile ? ' input-error' : ''}`}
                 onChange={handleChange}
               />
+              {errors.uploadedFile && <span className="field-error">{errors.uploadedFile}</span>}
             </div>
+
           </div>
         </div>
 
         {/* ── Section 7: Declaration ── */}
         <div className="form-section">
           <h2 className="section-title">Declaration</h2>
-
           <label className="checkbox-option">
             <input
-              type="checkbox"
-              name="declarationAccepted"
-              checked={formData.declarationAccepted}
-              onChange={handleChange}
+              type="checkbox" name="declarationAccepted"
+              checked={formData.declarationAccepted} onChange={handleChange}
             />
             <span>
               I declare that the information provided is accurate and that I was not the owner
-              of the vehicle at the time of the infraction.
+              of the vehicle at the time of the infraction. <span className="required">*</span>
             </span>
           </label>
+          {errors.declarationAccepted && <span className="field-error">{errors.declarationAccepted}</span>}
         </div>
 
         {submitResult && (

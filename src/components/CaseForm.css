@@ -145,6 +145,24 @@
   cursor: pointer;
 }
 
+/* ── Required asterisk ── */
+.required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+/* ── Field error ── */
+.field-error {
+  color: #ef4444;
+  font-size: 0.78rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.input-error {
+  box-shadow: 0 0 0 2px #ef4444 !important;
+}
+
 /* ── File input ── */
 .file-input {
   background-color: #ffffff;
