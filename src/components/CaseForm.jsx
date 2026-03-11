@@ -3,25 +3,25 @@ import './CaseForm.css'
 
 const INFRACTION_TYPES = [
   { value: '', label: 'Select infraction type' },
-  { value: 'traffic_fine', label: 'Traffic fine' },
-  { value: 'toll_violation', label: 'Toll violation' },
-  { value: 'other', label: 'Other vehicle-related charge' },
+  { value: '1', label: 'Traffic fine' },
+  { value: '2', label: 'Toll violation' },
+  { value: '3', label: 'Other vehicle-related charge' },
 ]
 
 const OWNERSHIP_STATUSES = [
-  { value: 'sold_before', label: 'I sold the vehicle before the infraction' },
-  { value: 'purchased_after', label: 'I purchased the vehicle after the infraction' },
-  { value: 'never_owned', label: 'I never owned the vehicle' },
-  { value: 'transferred_not_registered', label: 'The vehicle was transferred but not yet registered' },
-  { value: 'other', label: 'Other' },
+  { value: '1', label: 'I sold the vehicle before the infraction' },
+  { value: '2', label: 'I purchased the vehicle after the infraction' },
+  { value: '3', label: 'I never owned the vehicle' },
+  { value: '4', label: 'The vehicle was transferred but not yet registered' },
+  { value: '5', label: 'Other' },
 ]
 
 const DOCUMENT_TYPES = [
   { value: '', label: 'Select document type' },
-  { value: 'sale_contract', label: 'Vehicle Sale Contract' },
-  { value: 'ownership_certificate', label: 'Vehicle Ownership Certificate' },
-  { value: 'id_document', label: 'ID Document' },
-  { value: 'other', label: 'Other Supporting Document' },
+  { value: '1', label: 'Vehicle Sale Contract' },
+  { value: '2', label: 'Vehicle Ownership Certificate' },
+  { value: '3', label: 'ID Document' },
+  { value: '4', label: 'Other Supporting Document' },
 ]
 
 const initialFormData = {
