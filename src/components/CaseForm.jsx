@@ -49,19 +49,21 @@ const API_URL = 'http://localhost:8080/nivi/api/cases'
 
 function validate(formData) {
   const errors = {}
-  if (!formData.trafficFineNumber.trim())   errors.trafficFineNumber = 'Required'
-  if (!formData.infractionDate)             errors.infractionDate = 'Required'
-  if (!formData.infractionType)             errors.infractionType = 'Required'
-  if (!formData.firstName.trim())           errors.firstName = 'Required'
-  if (!formData.lastName.trim())            errors.lastName = 'Required'
+  if (!formData.trafficFineNumber.trim())  errors.trafficFineNumber = 'Required'
+  if (!formData.infractionDate)            errors.infractionDate = 'Required'
+  if (!formData.infractionType)            errors.infractionType = 'Required'
+  if (!formData.firstName.trim())          errors.firstName = 'Required'
+  if (!formData.lastName.trim())           errors.lastName = 'Required'
+  if (!formData.vat.trim())                errors.vat = 'Required'
   if (!formData.dateOfBirth)               errors.dateOfBirth = 'Required'
   if (!formData.address.trim())            errors.address = 'Required'
   if (!formData.licensePlateNumber.trim()) errors.licensePlateNumber = 'Required'
   if (!formData.vin.trim())                errors.vin = 'Required'
   if (!formData.vehicleBrand.trim())       errors.vehicleBrand = 'Required'
   if (!formData.ownershipStatus)           errors.ownershipStatus = 'Required'
-  if (!formData.dateSold && !formData.datePurchased && !formData.transferRegistrationDate)
-    errors.ownershipTimeline = 'At least one date is required'
+  if (!formData.dateSold)                  errors.dateSold = 'Required'
+  if (!formData.datePurchased)             errors.datePurchased = 'Required'
+  if (!formData.transferRegistrationDate)  errors.transferRegistrationDate = 'Required'
   if (!formData.documentType)              errors.documentType = 'Required'
   if (!formData.uploadedFile)              errors.uploadedFile = 'Required'
   if (!formData.declarationAccepted)       errors.declarationAccepted = 'You must accept the declaration'
@@ -299,38 +301,39 @@ export default function CaseForm() {
 
         {/* ── Section 5: Ownership Timeline ── */}
         <div className="form-section">
-          <h2 className="section-title">Ownership Timeline <span className="required">*</span></h2>
+          <h2 className="section-title">Ownership Timeline</h2>
           <div className="form-grid">
 
             <div className="form-group">
-              <label htmlFor="dateSold">Date Vehicle Sold</label>
+              <label htmlFor="dateSold">Date Vehicle Sold <span className="required">*</span></label>
               <input
                 id="dateSold" name="dateSold" type="date"
                 value={formData.dateSold} onChange={handleChange}
-                className={errors.ownershipTimeline ? 'input-error' : ''}
+                className={errors.dateSold ? 'input-error' : ''}
               />
+              {errors.dateSold && <span className="field-error">{errors.dateSold}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="datePurchased">Date Vehicle Purchased</label>
+              <label htmlFor="datePurchased">Date Vehicle Purchased <span className="required">*</span></label>
               <input
                 id="datePurchased" name="datePurchased" type="date"
                 value={formData.datePurchased} onChange={handleChange}
-                className={errors.ownershipTimeline ? 'input-error' : ''}
+                className={errors.datePurchased ? 'input-error' : ''}
               />
+              {errors.datePurchased && <span className="field-error">{errors.datePurchased}</span>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="transferRegistrationDate">Ownership Transfer Registration Date</label>
+              <label htmlFor="transferRegistrationDate">Ownership Transfer Registration Date <span className="required">*</span></label>
               <input
                 id="transferRegistrationDate" name="transferRegistrationDate" type="date"
                 value={formData.transferRegistrationDate} onChange={handleChange}
-                className={errors.ownershipTimeline ? 'input-error' : ''}
+                className={errors.transferRegistrationDate ? 'input-error' : ''}
               />
+              {errors.transferRegistrationDate && <span className="field-error">{errors.transferRegistrationDate}</span>}
             </div>
-
           </div>
-          {errors.ownershipTimeline && <span className="field-error">{errors.ownershipTimeline}</span>}
         </div>
 
         {/* ── Section 6: Supporting Documents Upload ── */}
