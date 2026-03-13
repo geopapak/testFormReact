@@ -215,7 +215,7 @@ export default function CaseForm() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="vat">VAT <span className="required">*</span></label>
+              <label htmlFor="vat">VAT Number <span className="required">*</span></label>
               <input
                 id="vat" name="vat" type="text" placeholder="VAT"
                 value={formData.vat} onChange={handleChange}
